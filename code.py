@@ -14,33 +14,29 @@ button.pull = digitalio.Pull.UP
 
 encoder = rotaryio.IncrementalEncoder(board.D10, board.D9)
 
-def zoom_in():
-    kbd = Keyboard(usb_hid.devices)
-    kbdLayout = KeyboardLayoutUS(kbd)
-    # You can also control press and release actions separately.
-    kbd.press(Keycode.ALT)
-
-    m = Mouse(usb_hid.devices)
-    m.move(wheel= 1)
-    kbd = Keyboard(usb_hid.devices)
-    kbdLayout = KeyboardLayoutUS(kbd)
-    kbd.release_all()
-
-def zoom_out():
-    kbd = Keyboard(usb_hid.devices)
-    kbdLayout = KeyboardLayoutUS(kbd)
-    # You can also control press and release actions separately.
-    kbd.press(Keycode.ALT)
-
-    m = Mouse(usb_hid.devices)
-    m.move(wheel= -1)
-    kbd = Keyboard(usb_hid.devices)
-    kbdLayout = KeyboardLayoutUS(kbd)
-    kbd.release_all()
-
 button_state = None
 last_position = encoder.position
 key_pressed = False
+
+def make_it_a_mouse(increment):
+    m = Mouse(usb_hid.devices)
+    print(increment)
+    m.move(wheel = increment)
+
+def zoom_in_out(increment):
+
+    # make it a keyboard first
+    kbd = Keyboard(usb_hid.devices)
+    kbdLayout = KeyboardLayoutUS(kbd)
+    kbd.press(Keycode.ALT)
+
+    make_it_a_mouse(increment)
+
+    # make it a keyboard again
+    kbd = Keyboard(usb_hid.devices)
+    kbdLayout = KeyboardLayoutUS(kbd)
+    kbd.release_all()
+
 
 while True:
     current_position = encoder.position
@@ -48,11 +44,11 @@ while True:
 
     if (position_change > 0) and (key_pressed == True) :
         for _ in range(position_change):
-            zoom_in()
+            zoom_in_out(1)
             print(current_position)
     elif (position_change < 0) and (key_pressed == True) :
         for _ in range(-position_change):
-            zoom_out()
+            zoom_in_out(-1)
             print(current_position)
     last_position = current_position
 
